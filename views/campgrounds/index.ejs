@@ -1,4 +1,12 @@
 <% layout('layouts/boilerplate')%>
+<script src="/javascripts/clusterMap.js"></script>
+
+<div id="cluster-map" style="width: 100%; height: 500px"></div>
+
+<script>
+    const maptilerApiKey = '<%- process.env.MAPTILER_API_KEY %>';
+    const campgrounds = { features: <%- JSON.stringify(campgrounds) %>}
+</script>
 
 <h1>All Campgrounds</h1>
 <div>
@@ -8,7 +16,11 @@
 <div class="card" mb-3>
     <div class="row">
         <div class="col-md-4">
-            <img class="img-fluid" alt="" src="<%= campground.images[0].url %>">
+            <% if(campground.images.length) { %>
+                <img class="img-fluid" alt="" src="<%= campground.images[0].url %>">
+            <% } else { %>
+                <img class="img-fluid" alt="" src="https://res.cloudinary.com/ddrsinubh/image/upload/v1720596837/YelpCamp/cnvval7limqgbh3k0tbv.jpg">
+            <% } %>
         </div>
         <div class="col-md-8">
             <div class="card-body">
@@ -23,3 +35,4 @@
     </div>
 </div>
 <% }%>
+
