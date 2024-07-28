@@ -12,7 +12,7 @@
         <h1 class="text-centre">Edit Campground</h1>
         <div class="col-6 offset-3">
             
-            <form action="/campgrounds/<%=campground._id%>?_method=PUT" method="POST" novalidate class="validated-form" enctype="multipart/form-data">
+            <form id="editCampgroundForm" action="/campgrounds/<%=campground._id%>?_method=PUT" method="POST" novalidate class="validated-form" enctype="multipart/form-data">
             <div class="mb-3">
                 <label class="form-label" for="title">Title</label>
                 <input class="form-control" type="text" id="title" name="campground[title]" value="<%=campground.title %>" required>
@@ -37,11 +37,10 @@
             </div> -->
 
             <!-- file input -->
-            <div class="mt-3 mb-5 custom-file">
-                <label for="image" class="form-label">Choose Images</label>
-                <input class="form-control" type="file" id="image" name="image" multiple>
-                <label for="image" class="custom-file-label text-muted"></label>
-              </div>
+            <div class="mb-3">
+                <label class="form-label" for="price">Add More Image(s):</label>
+                <input type="file" class="filepond" id="image" name="image" multiple>
+            </div>
             
             
     
@@ -102,4 +101,60 @@
     </footer>
     
         </div>
+
+
+        <script>
+            // register the FilePond Image Preview plugin
+            FilePond.registerPlugin(FilePondPluginImagePreview);
+           
+            // select the file input element that you want to use FilePond with
+            const inputElement = document.querySelector('input#image');
+           
+            // create a FilePond instance
+            const pond = FilePond.create(inputElement, {
+              instantUpload: false,
+              allowMultiple: true,
+              name: 'image'
+            });
+           
+            // handle form submission
+            document.getElementById('editCampgroundForm').addEventListener('submit', async (e) => {
+              e.preventDefault(); // prevent the form from submitting normally, instead we need to handle the form submission manually with JavaScript when using FilePond
+           
+              // get the form element
+              const form = e.target;
+           
+              // create a new FormData object
+              const formData = new FormData(form);
+           
+              // remove empty values for 'image' field
+              formData.delete('image');
+           
+              // add FilePond files to the form data
+              const files = pond.getFiles();
+              for (let i = 0; i < files.length; i++) {
+                formData.append('image', files[i].file, files[i].file.name);
+              }
+           
+              // submit the form using fetch
+              try {
+                const response = await fetch(form.action, {
+                  method: form.method,
+                  body: formData
+                });
+           
+                if (!response.ok) {
+                  throw new Error('Network response was not ok ' + response.statusText);
+                }
+           
+                // if form submission is successful, follow the redirect from the response
+                if (response.redirected) {
+                  window.location.href = response.url;
+                }
+              } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+              }
+            });
+          </script>
+
     </div>
