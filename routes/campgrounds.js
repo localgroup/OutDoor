@@ -14,8 +14,8 @@ const upload = multer({storage});
 const Campground = require('../models/campground');
 
 // router.route('/')
-//     .get(catchAsync(campgrounds.index))
-//     .post(isLoggedIn, upload.array('image', 5), validateCampground,  catchAsync(campgrounds.createCampground))
+    // .get(catchAsync(campgrounds.index))
+    // .post(isLoggedIn, upload.array('image', 5), validateCampground,  catchAsync(campgrounds.createCampground))
 
 router.route('/')
     .get(catchAsync(campgrounds.index))

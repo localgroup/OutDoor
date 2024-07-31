@@ -9,15 +9,42 @@ const methodOverride = require('method-override');
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User = require('./models/user');
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+
+
+require('dotenv').config();
+
+
 
 
 const userRoutes = require('./routes/users');
 const campgroundRoutes = require('./routes/campgrounds');
 const reviewRoutes = require('./routes/reviews');
 
-mongoose.connect('mongodb://localhost:27017/yelp-camp', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
+// const dbUrl = process.env.DB_URL
+// // 'mongodb://localhost:27017/yelp-camp'
+// mongoose.connect(dbUrl, {});
+
+// const db = mongoose.connection;
+// db.on("error", console.error.bind(console, "connection error:"));
+// db.once("open", () => {
+//     console.log("Database connected");
+// });
+
+
+
+const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp';
+
+mongoose.connect(dbUrl, {
+    serverSelectionTimeoutMS: 30000, // 30 seconds
+    socketTimeoutMS: 45000, // 45 seconds
+})
+.then(() => {
+    console.log('Database connected');
+})
+.catch(err => {
+    console.error('Database connection error:', err);
 });
 
 const db = mongoose.connection;
@@ -26,11 +53,16 @@ db.once("open", () => {
     console.log("Database connected");
 });
 
+
+
+
 const app = express();
 
 app.engine('ejs', ejsMate)
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'))
+
+app.use(mongoSanitize());
 
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride('_method'));
@@ -39,11 +71,13 @@ app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname, 'public')))
 
 const sessionConfig = {
-    secret: 'thisshouldbeabettersecret!',
+    name: 'session',
+    secret: 'secret-message',
     resave: false,
     saveUninitialized: true,
     cookie: {
         httpOnly: true,
+        // secure: true,
         expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
         maxAge: 1000 * 60 * 60 * 24 * 7
     }
@@ -51,6 +85,51 @@ const sessionConfig = {
 
 app.use(session(sessionConfig))
 app.use(flash());
+
+const scriptSrcUrls = [
+    "https://stackpath.bootstrapcdn.com/",
+    "https://kit.fontawesome.com/",
+    "https://cdnjs.cloudflare.com/",
+    "https://cdn.jsdelivr.net",
+    "https://cdn.maptiler.com/",
+    "https://unpkg.com/"
+];
+const styleSrcUrls = [
+    "https://kit-free.fontawesome.com/",
+    "https://stackpath.bootstrapcdn.com/",
+    "https://fonts.googleapis.com/",
+    "https://use.fontawesome.com/",
+    "https://cdn.jsdelivr.net",
+    "https://cdn.maptiler.com/",
+    "https://unpkg.com/"
+];
+const connectSrcUrls = [
+    "https://api.maptiler.com/",
+];
+const fontSrcUrls = [];
+
+app.use(
+    helmet.contentSecurityPolicy({
+        directives: {
+            defaultSrc: [],
+            connectSrc: ["'self'", ...connectSrcUrls],
+            scriptSrc: ["'unsafe-inline'", "'self'", ...scriptSrcUrls],
+            styleSrc: ["'self'", "'unsafe-inline'", ...styleSrcUrls],
+            workerSrc: ["'self'", "blob:"],
+            objectSrc: [],
+            imgSrc: [
+                "''self'",
+                "blob:",
+                "data:",
+                "https://res.cloudinary.com/ddrsinubh/",
+                "https://images.unsplash.com/",
+                "https://api.maptiler.com/",
+                ],
+            fontSrc: ["'self'", ...fontSrcUrls],
+        },
+    })
+);
+
 
 app.use(passport.initialize());
 app.use(passport.session());

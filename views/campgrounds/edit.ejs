@@ -9,8 +9,8 @@
 
 
     <div class="row">
-        <h1 class="text-centre">Edit Campground</h1>
-        <div class="col-6 offset-3">
+        <h1 class="text-center">Edit Campground</h1>
+        <div class="col-md-6 offset-md-3">
             
             <form id="editCampgroundForm" action="/campgrounds/<%=campground._id%>?_method=PUT" method="POST" novalidate class="validated-form" enctype="multipart/form-data">
             <div class="mb-3">
@@ -103,7 +103,65 @@
         </div>
 
 
-        <script>
+        <!-- <script>
+            // register the FilePond Image Preview plugin
+            FilePond.registerPlugin(FilePondPluginImagePreview);
+
+            // select the file input element that you want to use FilePond with
+            const inputElement = document.querySelector('input#image');
+
+            // create a FilePond instance
+            const pond = FilePond.create(inputElement, {
+            instantUpload: false,
+            allowMultiple: true,
+            name: 'image'
+            });
+
+            // handle form submission
+            document.getElementById('editCampgroundForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); // prevent the form from submitting normally, instead we need to handle the form submission manually with JavaScript when using FilePond
+
+            // get the form element
+            const form = e.target;
+
+            // create a new FormData object
+            const formData = new FormData(form);
+
+            // remove empty values for 'image' field
+            formData.delete('image');
+
+            // add FilePond files to the form data
+            const files = pond ? pond.getFiles() : [];
+            if (files.length > 0) {
+                for (let i = 0; i < files.length; i++) {
+                formData.append('image', files[i].file, files[i].file.name);
+                }
+            }
+
+            // submit the form using fetch
+            try {
+                const response = await fetch(form.action, {
+                method: form.method,
+                body: formData
+                });
+
+                if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+                }
+
+                // if form submission is successful, follow the redirect from the response
+                if (response.redirected) {
+                window.location.href = response.url;
+                }
+            } catch (error) {
+                console.error('There was a problem with the fetch operation:', error);
+                // display an error message to the user
+                alert('Error submitting form: ' + error.message);
+            }
+            });
+          </script> -->
+
+          <script>
             // register the FilePond Image Preview plugin
             FilePond.registerPlugin(FilePondPluginImagePreview);
            
